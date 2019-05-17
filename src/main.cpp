@@ -90,21 +90,22 @@ void setup() {
 	digitalWrite(CHIPSEL, HIGH);
 	SPI.begin(VSPICLK, VSPIQ, VSPID, VSPIQ);
 	pinMode(CHIPSEL, OUTPUT);
+	SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
 	digitalWrite(CHIPSEL, LOW);
-	SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE3));
-	//SPI.transfer(0x01);
+	data[0] = SPI.transfer(0x16 | 0x01);
 	
-	data[0] = SPI.transfer(0x19);
-	//data[0] = SPI.transfer(0);
-	//data[1] = SPI.transfer(0);
-	//data[2] = SPI.transfer(0);
-	//data[3] = SPI.transfer(0);
-	SPI.endTransaction();
+	
+	/*data[0] = SPI.transfer(0x16);
+	data[1] = SPI.transfer(0x17);
+	data[2] = SPI.transfer(0x18);
+	data[3] = SPI.transfer(0x19);*/
 	digitalWrite(CHIPSEL, HIGH);
+	SPI.endTransaction();
 	delay(5000);
 	Serial.println(data[0]);
-	Serial.println(0x01 | 0x16, BIN);
-	Serial.println(0x01 | 0x16, HEX);
+	Serial.println(data[1]);
+	Serial.println(data[2]);
+	Serial.println(data[3]);
 	/*vspi->beginTransaction(SPISettings(SPI_CLK, MSBFIRST, SPI_MODE0));
 	digitalWrite(5, LOW);
 	vspi->write(SPI_READ_INIT);
