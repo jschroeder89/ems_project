@@ -3,8 +3,7 @@
 #include <BLEUtils.h>
 #include <BLE2902.h>
 #include <Arduino.h>
-#include <SPI.h>
-
+#include <Wire.h>
 
 /*BLE*/
 BLEServer *pServer = NULL;
@@ -13,11 +12,8 @@ bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint8_t txValue = 5;
 
-/*SPI*/
-static const int SPI_CLK = 1000000; 
-
-SPIClass *vspi = NULL;
-SPIClass *hspi = NULL;
+/*I2C*/
+TwoWire i2c = TwoWire(0);
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -25,15 +21,13 @@ SPIClass *hspi = NULL;
 #define SERVICE_UUID "6E400001-B5A3-F393-E0A9-E50E24DCCA9E" // UART service UUID
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
-#define VSPICLK 18
-#define VSPICS0 5
-#define VSPIQ 19
-#define VSPID 23
-#define CHIPSEL 5
-#define SPI_READ_INIT 0x7F
+#define SDA 21 //PIN 32 new ESP32
+#define SCL 22 //PIN 33 new ESP32
+#define INTERRUPT_PIN 36
+#define SLAVE_ADDR 0x69
 #define ACC_Z_LOW 0x16
 #define ACC_Z_HIGH 0x17
-#define READ_BYTE 0b00000001
+
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -64,53 +58,78 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 	}
 };
 
-uint8_t spi_test() {
-	byte data = 0;
-	for (size_t i = 0; i < 120; i++) {
-		vspi->beginTransaction(SPISettings(SPI_CLK, MSBFIRST, SPI_MODE0));
-		digitalWrite(CHIPSEL, LOW);
-		//vspi->transfer(0x01); //READBIT
-		data = vspi->transfer(0x96);
-		Serial.println(data);
-		digitalWrite(CHIPSEL, HIGH);
-		vspi->endTransaction();
-		delay(100);
-	}
+void writeToReg(uint8_t addr, uint8_t val) {
+	uint8_t SLAVE_ADDR_W = SLAVE_ADDR << 1;
+	i2c.beginTransmission(SLAVE_ADDR_W);
+	i2c.write(addr);
+	delay(2);
+	i2c.write(val);
+	delay(2);
+	i2c.endTransmission();
+}
+
+uint8_t readFromReg(uint8_t addr, size_t num_bytes) {
+	uint8_t SLAVE_ADDR_R = (SLAVE_ADDR << 1) | 0b00000001;
+	uint8_t SLAVE_ADDR_W = SLAVE_ADDR << 1;
+	i2c.beginTransmission(SLAVE_ADDR_W);
+	i2c.write(addr);
+	delay(2);
+	i2c.endTransmission();
+	delay(2);
+	i2c.beginTransmission(SLAVE_ADDR_R);
+	i2c.requestFrom(SLAVE_ADDR_R, num_bytes);
+	uint8_t data = i2c.read();
+	i2c.endTransmission();
 	return data;
 }
 
+void testRead() {
+	uint8_t byte1 = 0, byte2 = 0;
+	i2c.beginTransmission(0x68);
+	i2c.write(0x0C);
+	delay(10);
+	i2c.write(0x0D);
+	i2c.endTransmission(false);
+	i2c.requestFrom(0x68, 2);
+	if (i2c.available()) {
+		byte1 = i2c.read();
+		byte2 = i2c.read();
+	}
+	Serial.print("Byte1: ");
+	Serial.println(byte1);
+	Serial.print("Byte2: ");
+	Serial.println(byte2);
+	delay(100);
+}
+
+void interrupt_test() {
+	Serial.println("INTERRUPT TRIGGERD");
+}
+
+void testscan() {
+	Serial.println("SCAN BEGIN");
+	uint8_t cnt = 0;
+	for(uint8_t i=0; i< 128; i++) {
+		i2c.beginTransmission(i);
+		uint8_t ec = i2c.endTransmission(true);
+		if(ec == 0) {
+			if(i < 16) Serial.print('0');
+			Serial.print(i, HEX);
+			cnt++;
+		} else Serial.print("..");
+		Serial.print(' ');
+		if((i & 0x0f) == 0x0f) Serial.println();
+	}
+	Serial.println("SCAN COMPLETED");
+}
+
 void setup() {
-	Serial.begin(115200);
-	uint8_t acc_z_low = 0x16;
-	uint8_t read = 0x01;
-	uint8_t data[4] = {0};
-	uint8_t data_to_send = 0;
-	data_to_send = 0x16 | 0x01;
-	digitalWrite(CHIPSEL, LOW);
-	digitalWrite(CHIPSEL, HIGH);
-	SPI.begin(VSPICLK, VSPIQ, VSPID, VSPIQ);
-	pinMode(CHIPSEL, OUTPUT);
-	SPI.beginTransaction(SPISettings(14000000, MSBFIRST, SPI_MODE0));
-	digitalWrite(CHIPSEL, LOW);
-	data[0] = SPI.transfer(0x16 | 0x01);
-	
-	
-	/*data[0] = SPI.transfer(0x16);
-	data[1] = SPI.transfer(0x17);
-	data[2] = SPI.transfer(0x18);
-	data[3] = SPI.transfer(0x19);*/
-	digitalWrite(CHIPSEL, HIGH);
-	SPI.endTransaction();
-	delay(5000);
-	Serial.println(data[0]);
-	Serial.println(data[1]);
-	Serial.println(data[2]);
-	Serial.println(data[3]);
-	/*vspi->beginTransaction(SPISettings(SPI_CLK, MSBFIRST, SPI_MODE0));
-	digitalWrite(5, LOW);
-	vspi->write(SPI_READ_INIT);
-	digitalWrite(5, HIGH);
-	vspi->endTransaction();*/
+	// Initialize Baud rate
+	Serial.begin(115200);	
+	// Initialize I2C
+	i2c.begin(SDA, SCL, 400000);
+	// Initialize Interrupt Pin
+	attachInterrupt(INTERRUPT_PIN, interrupt_test, RISING);
 	// Create the BLE Deqvice
 	BLEDevice::init("ESP32");
 
@@ -144,7 +163,8 @@ void setup() {
 }
 
 void loop() {
-	//spi_test();
+	//Serial.println(readFromReg(0x02, 2));
+
 	if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
 		pTxCharacteristic->notify();
