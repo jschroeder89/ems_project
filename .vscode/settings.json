@@ -1,6 +1,6 @@
 {
     "terminal.integrated.env.linux": {
-        "PATH": "/home/johann/.platformio/penv/bin:/home/johann/.platformio/penv:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/johann/.esp/xtensa-esp32-elf/bin",
+        "PATH": "/home/johann/.platformio/penv/bin:/home/johann/.platformio/penv:/home/johann/.local/bin:/home/johann/.local/bin:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/home/johann/.esp/xtensa-esp32-elf/bin",
         "PLATFORMIO_CALLER": "vscode"
     }
 }
