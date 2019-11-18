@@ -1,4 +1,4 @@
-#include "BMI160.h"
+#include "BMI160.hpp"
 #include <Wire.h>
 
 BMI160::BMI160()
@@ -8,6 +8,7 @@ BMI160::BMI160()
 
 BMI160::~BMI160()
 {
+    
 }
 
 void BMI160::check_acc_range_conf(uint8_t *data) {
@@ -225,5 +226,49 @@ void BMI160::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
         Serial.print(addr++, HEX);
         Serial.println();
     }
+    return;
+}
+
+void BMI160::get_sensor_data()
+{
+    uint8_t data[6] = {0};
+    get_acc_data(data);
+    get_gyro_data(data);
+    return;
+}
+
+void BMI160::get_acc_data(uint8_t *data) 
+{
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], 0x12, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    acc_data.x = (uint16_t)((msb << 8) | lsb);
+    lsb = data[id++];
+    msb = data[id++];
+    acc_data.y = (uint16_t)((msb << 8) | lsb);
+    lsb = data[id++];
+    msb = data[id++];
+    acc_data.z = (uint16_t)((msb << 8) | lsb);
+    return;
+}
+
+void BMI160::get_gyro_data(uint8_t *data)
+{
+    uint8_t lsb;
+    uint8_t msb;
+    uint8_t id = 0;
+    read_reg(&data[0], 0x0C, 6);
+    lsb = data[id++];
+    msb = data[id++];
+    gyro_data.x = (uint16_t)((msb << 8) | lsb);
+    lsb = data[id++];
+    msb = data[id++];
+    gyro_data.y = (uint16_t)((msb << 8) | lsb);
+    lsb = data[id++];
+    msb = data[id++];
+    gyro_data.z = (uint16_t)((msb << 8) | lsb);
     return;
 }

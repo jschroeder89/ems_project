@@ -4,7 +4,7 @@
 #include <BLE2902.h>
 #include <Arduino.h>
 #include <Wire.h>
-#include <BMI160.h>
+#include <BMI160.hpp>
 
 /*BLE*/
 BLEServer *pServer = NULL;
@@ -55,18 +55,15 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 	}
 };
 
-void interrupt_test() {
-	Serial.println("INTERRUPT TRIGGERD");
-}
 
 void setup() {
 	Serial.begin(115200);
 	delay(5000);
 	bmi160.initialize_I2C();
-	//initialize_I2C();
 	//attachInterrupt(INTERRUPT_PIN, interrupt_test, CHANGE);
 	// Create the BLE Deqvice
 	//BLEDevice::init("ESP32"); //REENABLE
+	bmi160.get_sensor_data();
 
 	// Create the BLE Server
 	pServer = BLEDevice::createServer();

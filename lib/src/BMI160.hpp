@@ -65,6 +65,19 @@ class BMI160
 private:
     bool ACC_PWRMODE_NORMAL = false;
     bool GYRO_PWRMODE_NORMAL = false;
+    struct BMI160_ACC
+    {
+        uint16_t x;
+        uint16_t y;
+        uint16_t z;
+    } acc_data;
+    struct BMI160_GYRO
+    {
+        uint16_t x;
+        uint16_t y;
+        uint16_t z;
+    } gyro_data;
+    
 public:
     BMI160();
     ~BMI160();
@@ -82,6 +95,9 @@ public:
     void check_acc_pwr_mode(uint8_t *data);
     void check_gyro_pwr_mode(uint8_t *data);
     void initialize_power_mode(uint8_t *data);
+    void get_acc_data(uint8_t *data);
+    void get_gyro_data(uint8_t *data);
+    void get_sensor_data();
     void initialize_I2C();
     void interrupt_test();
 };
