@@ -166,9 +166,9 @@ void BMI160::initialize_power_mode(uint8_t *data)
 void BMI160::initialize_I2C()
 {
     uint8_t data[2] = {0};
-    Wire.begin(SDA, SCL, 2000000);
+    Wire.begin(SDA, SCL, 1000000);
     initialize_power_mode(data);
-    //initialize_acc(data);
+    initialize_acc(data);
     initialize_gyro(data);
 }
 
@@ -181,7 +181,7 @@ void BMI160::write_reg(uint8_t *data, uint8_t addr, uint8_t len)
         for (int i = 0; i < len; i++)
         {
             Wire.write(data[i]);
-            delay(1);
+            //delay(1);
         }
         Wire.endTransmission(true);
     }
@@ -192,7 +192,7 @@ void BMI160::write_reg(uint8_t *data, uint8_t addr, uint8_t len)
             Wire.beginTransmission(SLAVE_ADDR);
             Wire.write(addr);
             Wire.write(data[i]);
-            delay(1);
+            //delay(1);
             Wire.endTransmission(true);
         }
     }
@@ -204,12 +204,13 @@ void BMI160::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
     Wire.beginTransmission(SLAVE_ADDR);
     Wire.write(addr);
     Wire.endTransmission(true);
-    delay(10);
+    //delay(10);
     Wire.requestFrom(SLAVE_ADDR, len);
     for (int i = 0; i < len; i++)
     {
         data[i] = Wire.read();
-        delay(1);
+        //delay(1);
+        /*
         if (data[i] < 0x10)
         {
             Serial.print("Data: 0x0");
@@ -224,7 +225,7 @@ void BMI160::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
         else
             Serial.print(" @Adress: 0x");
         Serial.print(addr++, HEX);
-        Serial.println();
+        Serial.println();*/
     }
     return;
 }
@@ -271,4 +272,20 @@ void BMI160::get_gyro_data(uint8_t *data)
     msb = data[id++];
     gyro_data.z = (uint16_t)((msb << 8) | lsb);
     return;
+}
+
+uint16_t BMI160::publish_sensor_data() 
+{
+    uint16_t sensor_data[6] = {0};
+    sensor_data[ACC_X] = acc_data.x;
+    sensor_data[ACC_Y] = acc_data.y;
+    sensor_data[ACC_Z] = acc_data.z;
+    sensor_data[GYRO_X] = gyro_data.x;
+    sensor_data[GYRO_Y] = gyro_data.y;
+    sensor_data[GYRO_Z] = gyro_data.z;
+    for (int i = 0; i < 6; i++)
+    {   
+        Serial.println(sensor_data[i]);
+    }
+    return *sensor_data; 
 }

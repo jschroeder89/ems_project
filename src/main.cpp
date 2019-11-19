@@ -12,6 +12,7 @@ BLECharacteristic *pTxCharacteristic;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 uint8_t txValue = 5;
+const int ledPin = 33;
 
 // See the following for generating UUIDs:
 // https://www.uuidgenerator.net/
@@ -59,12 +60,13 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 void setup() {
 	Serial.begin(115200);
 	delay(5000);
+	pinMode(14, OUTPUT);
 	bmi160.initialize_I2C();
 	//attachInterrupt(INTERRUPT_PIN, interrupt_test, CHANGE);
 	// Create the BLE Deqvice
 	//BLEDevice::init("ESP32"); //REENABLE
-	bmi160.get_sensor_data();
-
+	
+	/*
 	// Create the BLE Server
 	pServer = BLEDevice::createServer();
 	pServer->setCallbacks(new MyServerCallbacks());
@@ -91,11 +93,33 @@ void setup() {
 	// Start advertising
 	pServer->getAdvertising()->addServiceUUID(pService->getUUID());
 	pServer->getAdvertising()->start();
-	Serial.println("Waiting a client connection to notify...");
+	Serial.println("Waiting a client connection to notify...");*/
 }
-
+uint8_t data = 0;
 void loop() {
-	if (deviceConnected) {	
+	bmi160.get_sensor_data();
+	//bmi160.publish_sensor_data();
+	if(digitalRead(14) == LOW) 
+	{
+		digitalWrite(14, HIGH);
+	} else
+		digitalWrite(14, LOW);
+	//delay(1);
+	
+	//if(digitalRead(14) == HIGH) 
+	//delay(1);
+	//Serial.println("DATA START");
+	//bmi160.get_sensor_data();
+	//bmi160.publish_sensor_data();
+	//delay(10);
+	//Serial.println("DATA END");
+	//digitalWrite(ledPin, HIGH);
+	//if(digitalRead(ledPin) == HIGH)
+	//{
+	//} 
+	//delay(500);
+	//digitalWrite(ledPin, LOW);
+	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
 		pTxCharacteristic->notify();
 		//txValue++;
@@ -114,5 +138,5 @@ void loop() {
 	if (deviceConnected && !oldDeviceConnected) {
 		// do stuff here on connecting
 		oldDeviceConnected = deviceConnected;
-	}
+	}*/
 }
