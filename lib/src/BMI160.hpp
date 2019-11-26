@@ -2,6 +2,7 @@
 #define BMI160_HPP
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 
 #define GYRO_X_LSB                  UINT8_C(0x0C)
 #define GYRO_X_MSB                  UINT8_C(0x0D)
@@ -85,19 +86,7 @@ class BMI160
 private:
     bool ACC_PWRMODE_NORMAL = false;
     bool GYRO_PWRMODE_NORMAL = false;
-    struct BMI160_ACC
-    {
-        uint16_t x;
-        uint16_t y;
-        uint16_t z;
-    } acc_data;
-    struct BMI160_GYRO
-    {
-        uint16_t x;
-        uint16_t y;
-        uint16_t z;
-    } gyro_data;
-    
+    StaticJsonDocument<6> BMI160_DATA;
 public:
     BMI160();
     ~BMI160();
@@ -120,7 +109,7 @@ public:
     void get_sensor_data();
     void initialize_I2C();
     void interrupt_test();
-    uint16_t publish_sensor_data();
+    size_t publish_sensor_data();
 };
 
 #endif

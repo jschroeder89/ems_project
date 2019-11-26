@@ -3,7 +3,11 @@
 
 BMI160::BMI160()
 {
-
+    for (size_t i = 0; i < BMI160_DATA.size(); i++)
+    {
+        BMI160_DATA.add(0);
+    }
+    
 }
 
 BMI160::~BMI160()
@@ -246,13 +250,13 @@ void BMI160::get_acc_data(uint8_t *data)
     read_reg(&data[0], 0x12, 6);
     lsb = data[id++];
     msb = data[id++];
-    acc_data.x = (uint16_t)((msb << 8) | lsb);
+    BMI160_DATA[ACC_X] = ((uint16_t)((msb << 8) | lsb));
     lsb = data[id++];
     msb = data[id++];
-    acc_data.y = (uint16_t)((msb << 8) | lsb);
+    BMI160_DATA[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
     lsb = data[id++];
     msb = data[id++];
-    acc_data.z = (uint16_t)((msb << 8) | lsb);
+    BMI160_DATA[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
     return;
 }
 
@@ -264,28 +268,17 @@ void BMI160::get_gyro_data(uint8_t *data)
     read_reg(&data[0], 0x0C, 6);
     lsb = data[id++];
     msb = data[id++];
-    gyro_data.x = (uint16_t)((msb << 8) | lsb);
+    BMI160_DATA[GYRO_X] = ((uint16_t)((msb << 8) | lsb));
     lsb = data[id++];
     msb = data[id++];
-    gyro_data.y = (uint16_t)((msb << 8) | lsb);
+    BMI160_DATA[GYRO_Y] = ((uint16_t)((msb << 8) | lsb));
     lsb = data[id++];
     msb = data[id++];
-    gyro_data.z = (uint16_t)((msb << 8) | lsb);
+    BMI160_DATA[GYRO_Z] = ((uint16_t)((msb << 8) | lsb));
     return;
 }
 
-uint16_t BMI160::publish_sensor_data() 
+size_t BMI160::publish_sensor_data() 
 {
-    uint16_t sensor_data[6] = {0};
-    sensor_data[ACC_X] = acc_data.x;
-    sensor_data[ACC_Y] = acc_data.y;
-    sensor_data[ACC_Z] = acc_data.z;
-    sensor_data[GYRO_X] = gyro_data.x;
-    sensor_data[GYRO_Y] = gyro_data.y;
-    sensor_data[GYRO_Z] = gyro_data.z;
-    for (int i = 0; i < 6; i++)
-    {   
-        Serial.println(sensor_data[i]);
-    }
-    return *sensor_data; 
+    return serializeJson(BMI160_DATA, Serial);
 }

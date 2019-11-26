@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <BMI160.hpp>
 
+
 /*BLE*/
 BLEServer *pServer = NULL;
 BLECharacteristic *pTxCharacteristic;
@@ -27,6 +28,7 @@ const int ledPin = 33;
 void interrupt_test();
 
 BMI160 bmi160;
+
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -95,30 +97,17 @@ void setup() {
 	pServer->getAdvertising()->start();
 	Serial.println("Waiting a client connection to notify...");*/
 }
-uint8_t data = 0;
+
 void loop() {
 	bmi160.get_sensor_data();
-	//bmi160.publish_sensor_data();
+	bmi160.publish_sensor_data();
 	if(digitalRead(14) == LOW) 
 	{
 		digitalWrite(14, HIGH);
 	} else
 		digitalWrite(14, LOW);
-	//delay(1);
 	
-	//if(digitalRead(14) == HIGH) 
-	//delay(1);
-	//Serial.println("DATA START");
-	//bmi160.get_sensor_data();
-	//bmi160.publish_sensor_data();
-	//delay(10);
-	//Serial.println("DATA END");
-	//digitalWrite(ledPin, HIGH);
-	//if(digitalRead(ledPin) == HIGH)
-	//{
-	//} 
-	//delay(500);
-	//digitalWrite(ledPin, LOW);
+	
 	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
 		pTxCharacteristic->notify();
