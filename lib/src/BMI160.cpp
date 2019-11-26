@@ -3,10 +3,7 @@
 
 BMI160::BMI160()
 {
-    for (size_t i = 0; i < BMI160_DATA.size(); i++)
-    {
-        BMI160_DATA.add(0);
-    }
+    
 }
 
 BMI160::~BMI160()
@@ -236,12 +233,15 @@ void BMI160::read_reg(uint8_t *data, uint8_t addr, uint8_t len)
 void BMI160::get_sensor_data()
 {
     uint8_t data[6] = {0};
-    get_acc_data(data);
-    get_gyro_data(data);
+    DynamicJsonDocument doc(128);
+    JsonArray BMI160_ARRAY = doc.createNestedArray("BMI160_ARRAY");
+    get_gyro_data(data, BMI160_ARRAY);
+    get_acc_data(data, BMI160_ARRAY);
+    publish_sensor_data(doc);
     return;
 }
 
-void BMI160::get_acc_data(uint8_t *data) 
+void BMI160::get_acc_data(uint8_t *data, JsonArray& array) 
 {
     uint8_t lsb;
     uint8_t msb;
@@ -249,17 +249,20 @@ void BMI160::get_acc_data(uint8_t *data)
     read_reg(&data[0], 0x12, 6);
     lsb = data[id++];
     msb = data[id++];
-    BMI160_DATA[ACC_X] = ((uint16_t)((msb << 8) | lsb));
+    //array[ACC_X] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    BMI160_DATA[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
+    //array[ACC_Y] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    BMI160_DATA[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
+    //array[ACC_Z] = ((uint16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
-void BMI160::get_gyro_data(uint8_t *data)
+void BMI160::get_gyro_data(uint8_t *data, JsonArray& array)
 {
     uint8_t lsb;
     uint8_t msb;
@@ -267,18 +270,23 @@ void BMI160::get_gyro_data(uint8_t *data)
     read_reg(&data[0], 0x0C, 6);
     lsb = data[id++];
     msb = data[id++];
-    BMI160_DATA[GYRO_X] = ((uint16_t)((msb << 8) | lsb));
+    //array[GYRO_X] = ((int16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    BMI160_DATA[GYRO_Y] = ((uint16_t)((msb << 8) | lsb));
+    //array[GYRO_Y] = ((int16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     lsb = data[id++];
     msb = data[id++];
-    BMI160_DATA[GYRO_Z] = ((uint16_t)((msb << 8) | lsb));
+    //array[GYRO_Z] = ((int16_t)((msb << 8) | lsb));
+    array.add(((uint16_t)((msb << 8) | lsb)));
     return;
 }
 
-size_t BMI160::publish_sensor_data() 
+size_t BMI160::publish_sensor_data(JsonDocument& doc) 
 {
-    return serializeMsgPack(BMI160_DATA, Serial);
-    //return serializeJson(BMI160_DATA, Serial);
+    size_t num_bytes = serializeMsgPack(doc, Serial);
+    //size_t num_bytes = serializeJson(doc, Serial);
+    Serial.println("");
+    return num_bytes;
 }

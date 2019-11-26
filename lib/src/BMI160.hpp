@@ -86,7 +86,6 @@ class BMI160
 private:
     bool ACC_PWRMODE_NORMAL = false;
     bool GYRO_PWRMODE_NORMAL = false;
-    StaticJsonDocument<6> BMI160_DATA;
 public:
     BMI160();
     ~BMI160();
@@ -106,10 +105,10 @@ public:
     void check_acc_pwr_mode(uint8_t *data);
     void check_gyro_pwr_mode(uint8_t *data);
     void initialize_power_mode(uint8_t *data);
-    void get_acc_data(uint8_t *data);
-    void get_gyro_data(uint8_t *data);
+    void get_acc_data(uint8_t *data, JsonArray& array);
+    void get_gyro_data(uint8_t *data, JsonArray& array);
     void get_sensor_data();
-    size_t publish_sensor_data();
+    size_t publish_sensor_data(JsonDocument& doc);
 };
 
 #endif

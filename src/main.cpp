@@ -62,7 +62,7 @@ class MyCallbacks : public BLECharacteristicCallbacks {
 void setup() {
 	Serial.begin(115200);
 	delay(5000);
-	pinMode(14, OUTPUT);
+	//pinMode(14, OUTPUT);
 	bmi160.initialize_I2C();
 	//attachInterrupt(INTERRUPT_PIN, interrupt_test, CHANGE);
 	// Create the BLE Deqvice
@@ -100,13 +100,12 @@ void setup() {
 
 void loop() {
 	bmi160.get_sensor_data();
-	bmi160.publish_sensor_data();
-	if(digitalRead(14) == LOW) 
+	/*if(digitalRead(14) == LOW) 
 	{
 		digitalWrite(14, HIGH);
 	} else
 		digitalWrite(14, LOW);
-	
+	*/
 	
 	/*if (deviceConnected) {	
 		pTxCharacteristic->setValue(&txValue, 1);
