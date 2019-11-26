@@ -7,7 +7,6 @@ BMI160::BMI160()
     {
         BMI160_DATA.add(0);
     }
-    
 }
 
 BMI160::~BMI160()
@@ -280,5 +279,6 @@ void BMI160::get_gyro_data(uint8_t *data)
 
 size_t BMI160::publish_sensor_data() 
 {
-    return serializeJson(BMI160_DATA, Serial);
+    return serializeMsgPack(BMI160_DATA, Serial);
+    //return serializeJson(BMI160_DATA, Serial);
 }

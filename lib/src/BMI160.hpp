@@ -90,6 +90,8 @@ private:
 public:
     BMI160();
     ~BMI160();
+    void initialize_I2C();
+    void interrupt_test();
     void read_reg(uint8_t *data, uint8_t addr, uint8_t len);
     void write_reg(uint8_t *data, uint8_t addr, uint8_t len);
     void check_acc_range_conf(uint8_t *data);
@@ -107,8 +109,6 @@ public:
     void get_acc_data(uint8_t *data);
     void get_gyro_data(uint8_t *data);
     void get_sensor_data();
-    void initialize_I2C();
-    void interrupt_test();
     size_t publish_sensor_data();
 };
 
